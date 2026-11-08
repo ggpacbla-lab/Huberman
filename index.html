@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#16202e">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<title>Programa Huberman 12S</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: una columna de libreta de gimnasio; cabecera con semana/bloque, tarjeta de sesión, barra de pestañas fija abajo */
+:root{
+  --bg:#eef0f3; --surface:#ffffff; --sunk:#e3e7ec; --ink:#16202e; --mute:#5d6878; --line:#d3d9e1;
+  --accent:#c47a0e; --accent-ink:#ffffff;
+  --fuerza:#1f4e79; --hiper:#6a35c9; --desc:#0f766e; --test:#b4232a; --cardio:#b05a08; --hiit:#b4232a; --rec:#0f766e;
+  --ok:#1d7a46; --skip:#8a94a3;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f141b; --surface:#18202b; --sunk:#222c39; --ink:#e7ecf2; --mute:#97a3b3; --line:#2c3746;
+  --accent:#f0a032; --accent-ink:#1a1206;
+  --fuerza:#6aa5dc; --hiper:#a98af0; --desc:#3fbcae; --test:#ef6b70; --cardio:#f0954a; --hiit:#ef6b70; --rec:#3fbcae;
+  --ok:#4cc27f; --skip:#6b7685; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f141b; --surface:#18202b; --sunk:#222c39; --ink:#e7ecf2; --mute:#97a3b3; --line:#2c3746;
+  --accent:#f0a032; --accent-ink:#1a1206;
+  --fuerza:#6aa5dc; --hiper:#a98af0; --desc:#3fbcae; --test:#ef6b70; --cardio:#f0954a; --hiit:#ef6b70; --rec:#3fbcae;
+  --ok:#4cc27f; --skip:#6b7685; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:0 calc(76px + env(safe-area-inset-bottom,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px;padding-top:14px}
+h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:.01em;margin:0;text-wrap:balance}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.lbl{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);font-weight:600}
+
+/* cabecera */
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.top h1{font-size:34px;line-height:1}
+.chip{display:inline-block;border-radius:99px;padding:3px 10px;font-size:12px;font-weight:600;color:#fff;background:var(--c,var(--fuerza))}
+.track{display:grid;grid-template-columns:repeat(12,1fr);gap:3px}
+.track span{height:6px;border-radius:2px;background:var(--sunk)}
+.track span.on{background:var(--c)}
+
+/* navegación de día */
+.daynav{display:flex;align-items:center;gap:8px}
+.daynav .arrow{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:18px;flex:none}
+.days{flex:1;display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.days button{height:40px;border-radius:8px;border:1px solid var(--line);background:var(--surface);font-family:var(--display);font-weight:600;font-size:15px;position:relative}
+.days button.sel{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.days button.done{background:var(--ok);color:#fff;border-color:var(--ok)}
+.days button.skip{background:var(--sunk);color:var(--skip);text-decoration:line-through}
+
+/* sesión */
+.session{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.shead{background:var(--c);color:#fff;padding:12px 14px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.shead h2{font-size:24px;line-height:1.05}
+.shead .dur{font-size:13px;opacity:.9;white-space:nowrap}
+.sbody{padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.hint{font-size:13px;color:var(--mute)}
+.ex{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:6px}
+.ex:first-of-type{border-top:0;padding-top:0}
+.exhead{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.exname{font-weight:600;min-width:0}
+.presc{font-family:var(--display);font-weight:700;font-size:19px;color:var(--c);white-space:nowrap}
+.exnote{font-size:12px;color:var(--mute)}
+.sets{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:6px}
+.set{display:flex;align-items:center;gap:4px;background:var(--sunk);border-radius:8px;padding:4px 6px}
+.set b{font-size:11px;color:var(--mute);width:14px;font-weight:600}
+.set input{width:100%;min-width:0;border:0;background:transparent;color:var(--ink);font:500 15px var(--mono);padding:6px 2px;text-align:center}
+.set input::placeholder{color:var(--mute);opacity:.55}
+.set i{font-style:normal;color:var(--mute);font-size:12px}
+.lines{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.lines li:first-child{font-weight:600;color:var(--c);list-style:none;margin-left:-18px;font-size:16px}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.field{display:flex;flex-direction:column;gap:3px;min-width:0}
+.field input,.field textarea,.wfield input{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:9px 10px;font:15px var(--body);width:100%;min-width:0}
+.field.full{grid-column:1/-1}
+.actions{display:flex;gap:8px;padding:0 14px 14px}
+.btn{flex:1;border-radius:10px;padding:12px;border:1px solid var(--line);background:var(--surface);font-weight:600}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);flex:2}
+.btn.danger{color:var(--test);border-color:var(--test)}
+.status{font-size:13px;padding:8px 14px;border-top:1px solid var(--line);color:var(--mute)}
+.status.ok{color:var(--ok);font-weight:600}
+
+/* plan */
+.grid{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;display:grid;grid-template-columns:44px repeat(7,1fr);gap:4px;align-items:center}
+.grid .wk{font-family:var(--display);font-weight:700;font-size:15px;color:var(--c)}
+.grid .hd{text-align:center;font-size:11px;color:var(--mute);font-weight:600}
+.cell{height:32px;border-radius:6px;border:1px solid var(--line);background:var(--bg);font-size:10px;font-weight:600;color:var(--mute)}
+.cell.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.cell.skip{background:var(--sunk);color:var(--skip)}
+.cell.cur{box-shadow:inset 0 0 0 2px var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--mute)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--c);margin-right:5px;vertical-align:-1px}
+
+/* progreso */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.card h3{font-size:20px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--sunk);border-radius:10px;padding:10px}
+.stat .v{font-family:var(--display);font-size:28px;font-weight:700;line-height:1}
+.bars{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;align-items:end;height:120px;position:relative}
+.bars .b{background:var(--cardio);border-radius:3px 3px 0 0;min-height:2px}
+.bars .t{position:absolute;left:0;right:0;border-top:1px dashed var(--mute);opacity:.6}
+.bars .t em{position:absolute;right:0;top:-16px;font-size:10px;color:var(--mute);font-style:normal}
+.blabels{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;font-size:10px;text-align:center;color:var(--mute)}
+.wfields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.wfield{display:flex;flex-direction:column;gap:3px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:6px 4px;border-bottom:1px solid var(--line);text-align:left}
+th{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.06em}
+td.r,th.r{text-align:right}
+.tw{overflow-x:auto}
+.rules{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+textarea{resize:vertical}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px}
+
+/* pestañas */
+.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);
+  padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));z-index:5}
+.tabs button{border:0;background:none;padding:6px 0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;color:var(--mute);font-weight:600}
+.tabs button svg{width:22px;height:22px}
+.tabs button[aria-current="page"]{color:var(--accent)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:14px;font-weight:600;z-index:6}
+@media (prefers-reduced-motion:no-preference){.days button,.cell,.btn{transition:background .15s,border-color .15s}}
+</style>
+</head><body>
+
+<div class="wrap" id="app"></div>
+<nav class="tabs" id="tabs">
+  <button data-v="hoy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></svg>Sesión</button>
+  <button data-v="plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Plan</button>
+  <button data-v="progreso"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Progreso</button>
+  <button data-v="reglas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>Reglas</button>
+</nav>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+// ---------- Programa ----------
+const PIERNAS=[["Peso muerto barra hexagonal","4 × 4–6","3 × 8–10","RIR 2"],["Sentadilla búlgara mancuernas","3 × 6–8 /pierna","3 × 10–12 /pierna","o prensa"],["Curl femoral máquina","3 × 6–8","3 × 10–15","bajada 3 s"],["Extensión de cuádriceps","2 × 8","2 × 12–15",""],["Gemelo de pie","3 × 8","3 × 12–15","pausa 1 s abajo"]];
+const TORSO=[["Press inclinado mancuernas 30°","4 × 5–7","3 × 8–12",""],["Dominadas (lastre si procede)","4 × 4–6","3 × 8–12","o jalón"],["Press hombro sentado mancuernas","3 × 6–8","3 × 10–12",""],["Remo pecho apoyado","3 × 6–8","3 × 10–12",""],["Face pull polea","2 × 12","2 × 15–20",""],["Cuello flex./ext. banda o disco","2 × 12","2 × 15–20","carga ligera"]];
+const BRAZOS=[["Fondos en paralelas","3 × 6–8","3 × 10–12","asistidos si hace falta"],["Dominadas supinas","3 × 6–8","3 × 10–12",""],["Curl inclinado mancuernas","3 × 6–8","3 × 10–15",""],["Tríceps polea sobre cabeza","3 × 6–8","3 × 10–15",""],["Gemelo sentado","3 × 10","3 × 15–20",""],["Cuello lateral banda","2 × 12 /lado","2 × 15–20 /lado",""],["Paseo del granjero","3 × 30–40 m","3 × 40 m",""]];
+const BLOQUE={1:"F",2:"F",3:"F",4:"D",5:"H",6:"H",7:"H",8:"D",9:"F",10:"F",11:"F",12:"T"};
+const BINFO={F:{n:"Fuerza",c:"--fuerza",t:"4–8 reps · descanso 2–4 min · RIR 1–2"},H:{n:"Hipertrofia",c:"--hiper",t:"8–15 reps · descanso 60–90 s · último set de aislamiento al fallo"},D:{n:"Descarga",c:"--desc",t:"2 series · −10 % carga · sin HIIT"},T:{n:"Test",c:"--test",t:"5 RM hexagonal y dominadas · 2.000 m remo"}};
+const HIIT={1:"6 × 20 s máx. / 90 s suave",2:"8 × 20 s máx. / 90 s suave",3:"10 × 30 s máx. / 90 s suave",5:"10 × 30 s máx. / 75 s suave",6:"4 × 4 min al 85–95 % (145–160 lpm) / 3 min suave",7:"12 × 30 s máx. / 60 s suave",9:"10 × 30 s máx. / 75 s suave",10:"4 × 4 min al 85–95 % (145–160 lpm) / 3 min suave",11:"12 × 30 s máx. / 60 s suave"};
+const DNAME=["Zona 2","Piernas","Calor+frío","Torso","Moderado","HIIT","Brazos"];
+const DSHORT=["Z2","Pier","Sauna","Torso","Mod","HIIT","Brazo"];
+
+function presc(e,b){ if(b==="F")return{n:e[0],p:e[1],nota:e[3]}; if(b==="H")return{n:e[0],p:e[2],nota:e[3]};
+  return{n:e[0],p:"2 ×"+e[2].split("×")[1],nota:"−10 % carga"}; }
+function nsets(p){const m=/^(\d+)\s*×/.exec(p);return m?+m[1]:3;}
+function strength(title,list,b,testList){
+  const exs=(b==="T"?testList:list.map(e=>presc(e,b))).map(e=>Object.assign(e,{sets:e.sets||nsets(e.p)}));
+  return{kind:"fuerza",title,dur:"50–60 min",hint:"Calentar 10–12 min + 2 series de aproximación. Apunta kg y reps de cada serie.",exs};
+}
+function session(w,d){
+  const b=BLOQUE[w];
+  switch(d){
+  case 1:return{kind:"cardio",title:"Zona 2 larga",dur:b==="T"?"45–60 min":"60–75 min",lines:[b==="T"?"45–60 min en zona 2 (semana de test)":"60–75 min continuos en zona 2","≈ 115–128 lpm, respiración nasal, puedes hablar en frases completas","Bici, remo, cinta inclinada o ruck con chaleco de 8–10 kg","Nov–mar: al aire libre a primera hora"],fields:[["medio","Medio","text"],["min","Minutos","number"],["fc","FC media (lpm)","number"]],z2:"min"};
+  case 2:return strength("Piernas",PIERNAS,b,[{n:"Peso muerto hexagonal: TEST 5 RM",p:"subir hasta 5 RM",nota:"series de aproximación hasta el máximo de 5",sets:5},{n:"Sentadilla búlgara",p:"2 × 10 /pierna",nota:"ligero"},{n:"Curl femoral máquina",p:"2 × 12",nota:"ligero"},{n:"Gemelo de pie",p:"2 × 12",nota:""}]);
+  case 3:return{kind:"rec",title:"Calor + frío",dur:"40–60 min",lines:["Sauna 15–20 min (80–95 °C) + frío 1–5 min","Repetir 2–3 rondas; termina en frío si ese día no hay fuerza","Añade una caminata de 20–30 min (suma zona 2)","Nunca inmersión fría en las 6 h tras fuerza. Sin sauna el día de vuelo."],fields:[["rondas","Rondas","number"],["cam","Caminata (min)","number"]],z2:"cam"};
+  case 4:return strength("Torso y cuello",TORSO,b,[{n:"Dominadas: TEST 5 RM (lastre)",p:"subir hasta 5 RM",nota:"apunta el lastre en kg",sets:5},{n:"Press inclinado mancuernas",p:"2 × 10",nota:"ligero"},{n:"Remo pecho apoyado",p:"2 × 10",nota:"ligero"},{n:"Face pull polea",p:"2 × 15",nota:""}]);
+  case 5:return{kind:"cardio",title:"Cardio moderado",dur:"30–35 min",lines:[(b==="D"||b==="T")?"5 min suave + 20 min sostenido + 3 min suave":"5 min suave + 25–30 min sostenido + 3 min suave","≈ 130–145 lpm (zona 3–4), solo frases cortas","Remo o bici; carrera suave si las rodillas lo permiten"],fields:[["medio","Medio","text"],["dist","Distancia","text"],["fc","FC media (lpm)","number"]]};
+  case 6:
+    if(b==="D")return{kind:"cardio",title:"Zona 2 (descarga)",dur:"30–40 min",lines:["Semana de descarga: sin HIIT","30–40 min de zona 2 (≈ 115–128 lpm)"],fields:[["medio","Medio","text"],["min","Minutos","number"]],z2:"min"};
+    if(b==="T")return{kind:"hiit",title:"Test 2.000 m remo",dur:"25 min",lines:["TEST: 2.000 m en remo","Calentar 10 min con 3 aceleraciones de 15 s","Salida controlada, ritmo constante, últimos 500 m a tope"],fields:[["tiempo","Tiempo (min:s)","text"],["fc","FC pico (lpm)","number"]]};
+    {const h=HIIT[w],is44=h.indexOf("4 min")>=0;
+     return{kind:"hiit",title:is44?"VO2 máx. 4 × 4":"HIIT",dur:is44?"40 min":"20–25 min",lines:[h].concat(is44?["Sesión 4 × 4: sustituye al HIIT esta semana"]:[]).concat(["Calentamiento 5 min, vuelta a la calma 3–5 min","Assault bike, remo o bici estática; sin esprints en carrera","Para ante dolor torácico, mareo o palpitaciones"]),fields:[["medio","Medio","text"],["fc","FC pico (lpm)","number"]]};}
+  case 7:return strength("Brazos, gemelos, cuello",BRAZOS,b,[{n:"Fondos en paralelas",p:"2 × 10",nota:"ligero"},{n:"Curl inclinado mancuernas",p:"2 × 12",nota:""},{n:"Tríceps polea sobre cabeza",p:"2 × 12",nota:""},{n:"Gemelo sentado",p:"2 × 15",nota:""},{n:"Paseo del granjero",p:"2 × 40 m",nota:""}]);
+  }
+}
+const KC={fuerza:"--fuerza",cardio:"--cardio",hiit:"--hiit",rec:"--rec"};
+
+// ---------- Estado ----------
+const KEY="huberman12-v1";
+let S={cur:{w:1,d:1},log:{},weekly:{}};
+function load(){try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r);if(o&&o.log)S=Object.assign(S,o);}}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+load();
+const k=(w,d)=>"w"+w+"d"+d;
+let view="hoy";
+let sel={w:S.cur.w,d:S.cur.d};
+
+function toast(t){const el=document.getElementById("toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,1800);}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function entry(w,d){return S.log[k(w,d)]||(S.log[k(w,d)]={sets:{},f:{}});}
+function lastFor(name,w,d){ // últimas cargas del mismo ejercicio antes de esta sesión
+  const order=w*10+d;let best=null,bo=-1;
+  for(const key in S.log){const m=/w(\d+)d(\d+)/.exec(key);const o=+m[1]*10+ +m[2];if(o>=order||o<=bo)continue;
+    const s=S.log[key].sets&&S.log[key].sets[name];if(s&&s.some(x=>x&&(x[0]||x[1]))){best=s;bo=o;}}
+  return best;
+}
+function nextOpen(w,d){let o=(w-1)*7+d;for(let i=o;i<84;i++){const ww=Math.floor(i/7)+1,dd=i%7+1;const e=S.log[k(ww,dd)];if(!e||(!e.done&&!e.skip))return{w:ww,d:dd};}return{w:12,d:7};}
+
+// ---------- Vistas ----------
+function header(w){
+  const b=BINFO[BLOQUE[w]];
+  let tr="";for(let i=1;i<=12;i++)tr+=`<span class="${i===w?"on":""}" style="--c:var(${BINFO[BLOQUE[i]].c})"></span>`;
+  return `<div class="top"><div><div class="lbl">Programa Huberman · 12 semanas</div><h1>Semana <span class="num">${w}</span></h1></div>
+  <span class="chip" style="--c:var(${b.c})">${b.n}</span></div>
+  <div class="track" aria-label="Progreso de 12 semanas">${tr}</div>
+  <div class="hint">${b.t}</div>`;
+}
+function vHoy(){
+  const {w,d}=sel;const s=session(w,d);const e=S.log[k(w,d)]||{sets:{},f:{}};const c=KC[s.kind];
+  let days="";for(let i=1;i<=7;i++){const x=S.log[k(w,i)];days+=`<button data-day="${i}" class="${i===d?"sel ":""}${x&&x.done?"done":x&&x.skip?"skip":""}" aria-label="Día ${i}: ${DNAME[i-1]}">D${i}</button>`;}
+  let body="";
+  if(s.exs){
+    body+=`<div class="hint">${s.hint}</div>`;
+    s.exs.forEach((x,i)=>{const cur=(e.sets&&e.sets[x.n])||[];const last=lastFor(x.n,w,d)||[];
+      let sets="";for(let j=0;j<x.sets;j++){const v=cur[j]||["",""],l=last[j]||["",""];
+        sets+=`<label class="set"><b>${j+1}</b><input id="s-${w}-${d}-${i}-${j}-0" inputmode="decimal" data-ex="${esc(x.n)}" data-j="${j}" data-p="0" value="${esc(v[0])}" placeholder="${esc(l[0]||"kg")}" aria-label="${esc(x.n)} serie ${j+1} kg"><i>×</i><input id="s-${w}-${d}-${i}-${j}-1" inputmode="numeric" data-ex="${esc(x.n)}" data-j="${j}" data-p="1" value="${esc(v[1])}" placeholder="${esc(l[1]||"reps")}" aria-label="${esc(x.n)} serie ${j+1} reps"></label>`;}
+      body+=`<div class="ex"><div class="exhead"><span class="exname">${esc(x.n)}</span><span class="presc">${esc(x.p)}</span></div>${x.nota?`<span class="exnote">${esc(x.nota)}</span>`:""}<div class="sets">${sets}</div></div>`;});
+  }else{
+    body+=`<ul class="lines">${s.lines.map(l=>`<li>${esc(l)}</li>`).join("")}</ul><div class="fields">`;
+    s.fields.forEach(f=>{body+=`<label class="field"><span class="lbl">${f[1]}</span><input id="f-${w}-${d}-${f[0]}" data-f="${f[0]}" ${f[2]==="number"?'inputmode="numeric"':""} value="${esc((e.f||{})[f[0]])}"></label>`;});
+    body+=`</div>`;
+  }
+  body+=`<div class="fields"><label class="field"><span class="lbl">Sensación 1–10</span><input id="sens-${w}-${d}" data-f="sens" inputmode="numeric" value="${esc((e.f||{}).sens)}"></label><label class="field"><span class="lbl">Fecha</span><input id="date-${w}-${d}" data-f="date" type="date" value="${esc((e.f||{}).date)}"></label>
+  <label class="field full"><span class="lbl">Notas</span><textarea id="note-${w}-${d}" data-f="note" rows="2">${esc((e.f||{}).note)}</textarea></label></div>`;
+  const st=e.done?`<div class="status ok">Completada${e.f&&e.f.date?" · "+esc(e.f.date):""}</div>`:e.skip?`<div class="status">Saltada (vuelo o falta de hueco)</div>`:"";
+  return header(w)+`<div class="daynav"><button class="arrow" data-nav="-1" aria-label="Día anterior">‹</button><div class="days">${days}</div><button class="arrow" data-nav="1" aria-label="Día siguiente">›</button></div>
+  <section class="session" style="--c:var(${c})"><div class="shead"><h2>D${d} · ${esc(s.title)}</h2><span class="dur">${s.dur}</span></div>
+  <div class="sbody">${body}</div>${st}
+  <div class="actions">${e.done||e.skip?`<button class="btn" data-act="undo">Desmarcar</button>`:`<button class="btn" data-act="skip">Saltar</button>`}<button class="btn primary" data-act="done">${e.done?"Guardar cambios":"Completar sesión"}</button></div></section>`;
+}
+function vPlan(){
+  let g=`<div></div>`+DNAME.map((n,i)=>`<div class="hd">D${i+1}</div>`).join("");
+  for(let w=1;w<=12;w++){g+=`<div class="wk" style="--c:var(${BINFO[BLOQUE[w]].c})">S${w}</div>`;
+    for(let d=1;d<=7;d++){const x=S.log[k(w,d)];const cur=S.cur.w===w&&S.cur.d===d;
+      g+=`<button class="cell ${x&&x.done?"done":x&&x.skip?"skip":""} ${cur?"cur":""}" data-open="${w},${d}" aria-label="Semana ${w} día ${d}">${x&&x.done?"✓":x&&x.skip?"–":DSHORT[d-1]}</button>`;}}
+  const done=Object.values(S.log).filter(x=>x.done).length;
+  return `<div class="top"><div><div class="lbl">Calendario</div><h1>Plan</h1></div><span class="num">${done}/84</span></div>
+  <div class="legend"><span style="--c:var(--fuerza)">Fuerza</span><span style="--c:var(--hiper)">Hipertrofia</span><span style="--c:var(--desc)">Descarga</span><span style="--c:var(--test)">Test</span></div>
+  <div class="grid">${g}</div>
+  <div class="hint">Toca una casilla para abrir esa sesión. El borde ámbar marca tu siguiente sesión pendiente. Si vuelas, sigue el orden, no el día de la semana.</div>`;
+}
+function z2(w){let t=0;for(let d=1;d<=7;d++){const s=session(w,d),e=S.log[k(w,d)];if(s.z2&&e&&e.done)t+=+((e.f||{})[s.z2])||0;}t+=+((S.weekly["w"+w]||{}).extra)||0;return t;}
+function best(name){let b=null;for(const key in S.log){const s=(S.log[key].sets||{})[name];if(!s)continue;s.forEach(x=>{const v=parseFloat(String(x&&x[0]).replace(",","."));if(!isNaN(v)&&(b===null||v>b))b=v;});}return b;}
+function vProg(){
+  const w=sel.w,wk=S.weekly["w"+w]||{};
+  const mins=[];for(let i=1;i<=12;i++)mins.push(z2(i));const max=Math.max(220,...mins);
+  const bars=mins.map((m,i)=>`<div class="b" style="height:${m/max*100}%;${i+1===w?"":"opacity:.55"}" title="S${i+1}: ${m} min"></div>`).join("");
+  const done=Object.values(S.log).filter(x=>x.done).length,skip=Object.values(S.log).filter(x=>x.skip).length;
+  const lifts=[["Peso muerto barra hexagonal","Peso muerto hexagonal: TEST 5 RM","Peso muerto hexagonal"],["Dominadas (lastre si procede)","Dominadas: TEST 5 RM (lastre)","Dominadas (lastre)"],["Press inclinado mancuernas 30°","Press inclinado mancuernas","Press inclinado"],["Remo pecho apoyado","Remo pecho apoyado","Remo pecho apoyado"]];
+  const rows=lifts.map(l=>{const a=best(l[0]),b2=best(l[1]);const v=[a,b2].filter(x=>x!==null);return`<tr><td>${l[2]}</td><td class="r num">${v.length?Math.max(...v)+" kg":"—"}</td></tr>`;}).join("");
+  const wf=[["peso","Peso (kg)"],["cintura","Cintura (cm)"],["fc","FC reposo (lpm)"],["sueno","Sueño medio (h)"],["extra","Zona 2 extra: caminatas (min)"],["prot","Días con ≥140 g proteína"]];
+  return `<div class="top"><div><div class="lbl">Semana ${w}</div><h1>Progreso</h1></div></div>
+  <div class="stats"><div class="stat"><div class="v num">${done}</div><div class="lbl">Completadas</div></div><div class="stat"><div class="v num">${Math.round(done/84*100)}%</div><div class="lbl">Del programa</div></div><div class="stat"><div class="v num">${skip}</div><div class="lbl">Saltadas</div></div></div>
+  <div class="card"><h3>Minutos de zona 2 por semana</h3><div class="bars">${bars}<div class="t" style="bottom:${180/max*100}%"><em>objetivo 180</em></div></div><div class="blabels">${mins.map((m,i)=>`<span>S${i+1}</span>`).join("")}</div>
+  <div class="hint">Suma D1, la caminata de D3, la zona 2 de las semanas de descarga y las caminatas extra que apuntes abajo. Esta semana: <b class="num">${mins[w-1]}</b> min.</div></div>
+  <div class="card"><h3>Control de la semana ${w}</h3><div class="wfields">${wf.map(f=>`<label class="wfield"><span class="lbl">${f[1]}</span><input id="w-${w}-${f[0]}" data-w="${f[0]}" inputmode="decimal" value="${esc(wk[f[0]])}"></label>`).join("")}</div></div>
+  <div class="card"><h3>Mejores cargas registradas</h3><div class="tw"><table><thead><tr><th>Ejercicio</th><th class="r">Máx.</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+function vReglas(){
+  return `<div class="top"><div><div class="lbl">Protocolo</div><h1>Reglas</h1></div></div>
+  <div class="card"><h3>Fuerza</h3><ul class="rules"><li>Calentar 10–12 min: cardio suave, movilidad de cadera, hombro y torácica, y 2 series de aproximación.</li><li>Sesiones de 50–60 min tras calentar.</li><li>Básicos con RIR 1–2. Fallo solo en aislamiento y en el bloque de hipertrofia.</li><li>Si completas todas las series en el techo del rango, sube un 2,5–5 % la carga la sesión siguiente.</li><li>Los números grises en cada serie son lo que hiciste la última vez.</li></ul></div>
+  <div class="card"><h3>Cardio (FC máx. estimada ≈ 171 lpm)</h3><ul class="rules"><li>Zona 2: ≈ 115–128 lpm. Frases completas.</li><li>Moderado: ≈ 130–145 lpm. Frases cortas.</li><li>HIIT: más de 150 lpm en los picos. 4 × 4: 145–160 lpm.</li><li>Objetivo: 180–200 min de zona 2 a la semana.</li></ul></div>
+  <div class="card"><h3>Recuperación y vuelos</h3><ul class="rules"><li>Nada de inmersión fría en las 6 h tras fuerza.</li><li>Luz solar 5–10 min al despertar. Cafeína 60–90 min tras despertar y nunca 8–10 h antes de dormir.</li><li>Si faltan huecos: Piernas › Torso › Zona 2 › HIIT › Brazos › Moderado. Usa «Saltar» y la app te lleva a la siguiente.</li><li>Fuerza pesada y HIIT fuera de las 12 h previas a una presentación temprana o un vuelo largo.</li><li>Proteína 140–170 g/día en 4 tomas. Creatina 5 g/día.</li></ul></div>
+  <div class="card"><h3>Copia de seguridad</h3><div class="hint">Tus datos se guardan solo en este móvil. Copia el texto de vez en cuando y guárdalo en una nota o envíatelo por WhatsApp. Para restaurar, pégalo aquí y pulsa «Restaurar».</div>
+  <textarea id="bk" rows="4" style="width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:8px;font:12px var(--mono)"></textarea>
+  <div class="confirm"><button class="btn" data-act="copy">Copiar datos</button><button class="btn" data-act="restore">Restaurar</button></div>
+  <div class="confirm" id="resetbox"><button class="btn danger" data-act="reset">Borrar todo</button></div></div>`;
+}
+function render(){
+  const app=document.getElementById("app");
+  app.innerHTML=view==="hoy"?vHoy():view==="plan"?vPlan():view==="progreso"?vProg():vReglas();
+  document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.v===view?"page":"false"));
+}
+
+// ---------- Eventos ----------
+document.getElementById("tabs").addEventListener("click",ev=>{const b=ev.target.closest("button");if(!b)return;view=b.dataset.v;render();window.scrollTo(0,0);});
+const app=document.getElementById("app");
+app.addEventListener("input",ev=>{
+  const t=ev.target;
+  if(t.dataset.ex!==undefined){const e=entry(sel.w,sel.d);const a=e.sets[t.dataset.ex]||(e.sets[t.dataset.ex]=[]);const j=+t.dataset.j;a[j]=a[j]||["",""];a[j][+t.dataset.p]=t.value;save();}
+  else if(t.dataset.f){const e=entry(sel.w,sel.d);e.f=e.f||{};e.f[t.dataset.f]=t.value;save();}
+  else if(t.dataset.w){const wk=S.weekly["w"+sel.w]||(S.weekly["w"+sel.w]={});wk[t.dataset.w]=t.value;save();}
+});
+app.addEventListener("change",ev=>{if(ev.target.dataset.w==="extra")render();});
+app.addEventListener("click",ev=>{
+  const b=ev.target.closest("button");if(!b)return;
+  if(b.dataset.day){sel.d=+b.dataset.day;render();return;}
+  if(b.dataset.nav){let o=(sel.w-1)*7+sel.d-1+ +b.dataset.nav;o=Math.max(0,Math.min(83,o));sel={w:Math.floor(o/7)+1,d:o%7+1};render();return;}
+  if(b.dataset.open){const p=b.dataset.open.split(",");sel={w:+p[0],d:+p[1]};view="hoy";render();window.scrollTo(0,0);return;}
+  const a=b.dataset.act,e=entry(sel.w,sel.d);
+  if(a==="done"||a==="skip"){
+    if(a==="done"){e.done=true;e.skip=false;if(!e.f.date){e.f.date=new Date().toISOString().slice(0,10);}}else{e.skip=true;e.done=false;}
+    const was=e.done&&b.textContent==="Guardar cambios";
+    S.cur=nextOpen(sel.w,sel.d);save();
+    if(!was)sel={w:S.cur.w,d:S.cur.d};
+    toast(a==="done"?(was?"Cambios guardados":"Sesión completada"):"Sesión saltada");render();window.scrollTo(0,0);
+  }else if(a==="undo"){e.done=false;e.skip=false;S.cur=nextOpen(1,1);save();render();}
+  else if(a==="copy"){const t=document.getElementById("bk");t.value=JSON.stringify(S);
+    const ok=()=>toast("Datos copiados");const fail=()=>{t.focus();t.select();toast("Texto seleccionado: cópialo");};
+    try{navigator.clipboard.writeText(t.value).then(ok,fail);}catch(err){fail();}}
+  else if(a==="restore"){try{const o=JSON.parse(document.getElementById("bk").value);if(!o.log)throw 0;S=Object.assign({cur:{w:1,d:1},log:{},weekly:{}},o);save();sel={w:S.cur.w,d:S.cur.d};toast("Datos restaurados");render();}catch(err){toast("El texto no es una copia válida");}}
+  else if(a==="reset"){document.getElementById("resetbox").innerHTML=`<span>¿Borrar todos los registros?</span><button class="btn danger" data-act="reset2">Sí, borrar</button><button class="btn" data-act="cancel">Cancelar</button>`;}
+  else if(a==="reset2"){S={cur:{w:1,d:1},log:{},weekly:{}};save();sel={w:1,d:1};toast("Registros borrados");render();}
+  else if(a==="cancel"){render();}
+});
+render();
+})();
+</script>
+
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}</script>
+</body></html>
